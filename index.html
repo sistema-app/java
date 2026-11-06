@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Java · Recurso interactivo</title>
+<style>
+/* ===== Tokens: laboratorio de programación (plano azul tinta + ámbar + cian) ===== */
+:root{--bg:#0d1a2b;--panel:#142640;--line:#27456b;--ink:#e8f0fa;--mute:#8fa6c4;--amber:#ffb547;--cyan:#4fd3e8;--ok:#43d68a;--bad:#ff6b6b;--code:#09121f;
+--mono:"JetBrains Mono","Cascadia Code",Consolas,Menlo,monospace;--sans:"Segoe UI",Inter,system-ui,-apple-system,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);color:var(--ink);background:var(--bg);
+background-image:linear-gradient(rgba(79,211,232,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(79,211,232,.05) 1px,transparent 1px);background-size:28px 28px;min-height:100vh;display:flex;flex-direction:column}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+header{padding:18px 20px 12px;max-width:1000px;width:100%;margin:0 auto}
+.brand{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.brand h1{margin:0;font-family:var(--mono);font-size:2rem;letter-spacing:-1px;color:var(--amber)}
+.brand span{color:var(--mute)}
+.stats{display:flex;gap:14px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.bar{flex:1;min-width:160px;height:12px;background:var(--code);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--ok));transition:width .6s cubic-bezier(.2,.9,.3,1)}
+.pill{font-family:var(--mono);font-size:.85rem;padding:4px 10px;border:1px solid var(--line);border-radius:20px;background:var(--panel)}
+main{flex:1;max-width:1000px;width:100%;margin:0 auto;padding:0 20px 24px}
+footer{text-align:center;padding:16px;color:var(--mute);font-size:.85rem;border-top:1px solid var(--line)}
+/* navegación entre ejercicios */
+.nav{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 16px}
+.nav button{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-family:var(--mono);transition:.2s}
+.nav button:hover{transform:translateY(-2px);border-color:var(--cyan)}
+.nav .cur{border-color:var(--amber);color:var(--amber);box-shadow:0 0 0 2px rgba(255,181,71,.25)}
+.nav .done{background:var(--ok);color:#06210f;border-color:var(--ok)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:16px;animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card h2{margin:0 0 6px;font-size:1.4rem}
+.lvl{font-family:var(--mono);font-size:.8rem;color:var(--cyan)}
+.card p{line-height:1.55;margin:8px 0;max-width:70ch}
+.goal{border-left:4px solid var(--amber);padding:8px 12px;background:rgba(255,181,71,.08);border-radius:0 8px 8px 0}
+/* editor de código */
+pre.code{margin:0;background:var(--code);border:1px solid var(--line);border-radius:12px;padding:16px;font-family:var(--mono);font-size:.95rem;line-height:2.1;overflow-x:auto;white-space:pre}
+.slot{display:inline-block;min-width:78px;min-height:30px;line-height:26px;vertical-align:middle;text-align:center;border:2px dashed var(--cyan);border-radius:8px;color:var(--cyan);padding:0 8px;transition:.2s}
+.slot.over{background:rgba(79,211,232,.2);transform:scale(1.08)}
+.slot.full{border-style:solid;background:rgba(255,181,71,.15);color:var(--amber);cursor:pointer}
+.slot.ok{border-color:var(--ok);color:var(--ok);background:rgba(67,214,138,.14)}
+.slot.bad{border-color:var(--bad);color:var(--bad);background:rgba(255,107,107,.14);animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.pool{display:flex;flex-wrap:wrap;gap:10px;min-height:56px;padding:12px;border:1px dashed var(--line);border-radius:12px;margin-top:14px}
+.pool.over{background:rgba(79,211,232,.1)}
+.blk{font-family:var(--mono);padding:6px 12px;border-radius:8px;background:var(--amber);color:#2a1b00;font-weight:700;cursor:grab;user-select:none;box-shadow:0 3px 0 #b97a14;transition:transform .15s}
+.blk:hover{transform:translateY(-3px) rotate(-2deg)}
+.blk.drag{opacity:.4;transform:scale(.9)}
+.locked .blk,.locked .slot{pointer-events:none}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;align-items:center}
+.btn{padding:10px 18px;border-radius:10px;border:1px solid var(--line);background:var(--code);color:var(--ink);transition:.2s}
+.btn:hover:not(:disabled){border-color:var(--cyan);transform:translateY(-2px)}
+.btn.main{background:var(--cyan);color:#04202a;border-color:var(--cyan);font-weight:700}
+.btn.go{background:var(--amber);color:#2a1b00;border-color:var(--amber);font-weight:700}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.msg{margin-top:14px;padding:12px 14px;border-radius:10px;display:none;line-height:1.5}
+.msg.show{display:block;animation:in .3s}
+.msg.ok{background:rgba(67,214,138,.15);border:1px solid var(--ok)}
+.msg.bad{background:rgba(255,107,107,.15);border:1px solid var(--bad)}
+.msg.hint{background:rgba(79,211,232,.12);border:1px solid var(--cyan)}
+.badge{display:inline-flex;align-items:center;gap:8px;margin-top:8px;padding:6px 14px;border-radius:30px;background:var(--amber);color:#2a1b00;font-weight:700;animation:pop .6s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:scale(0) rotate(-30deg)}to{transform:none}}
+/* inicio y resultados */
+.hero{text-align:center;padding:30px 10px}
+.hero h2{font-size:2rem;margin:0 0 10px}
+.hero p{margin:10px auto}
+.big{font-family:var(--mono);font-size:3rem;color:var(--amber)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:14px 0}
+.bd{text-align:center;padding:12px 8px;border:1px solid var(--line);border-radius:12px;background:var(--code);font-size:.85rem}
+.bd b{display:block;font-size:1.8rem}
+.bd.off{opacity:.3;filter:grayscale(1)}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+td,th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+.fx{position:fixed;pointer-events:none;font-size:1.6rem;animation:fly 1.2s ease-out forwards;z-index:9}
+@keyframes fly{to{transform:translate(var(--x),-160px) rotate(360deg);opacity:0}}
+@media(max-width:600px){.brand h1{font-size:1.6rem}pre.code{font-size:.8rem}.nav button{width:34px;height:34px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><h1>Java</h1><span>Recurso interactivo</span></div>
+  <div class="stats">
+    <div class="bar" role="progressbar" aria-label="Progreso general"><i id="pb"></i></div>
+    <span class="pill" id="pg">0/10</span><span class="pill" id="sc">0 pts</span>
+    <button class="btn" id="btnRes">Ver resultados</button>
+  </div>
+</header>
+<main id="app"></main>
+<footer>Desarrollado por Jonathan López y Aliens</footer>
+
+<script>
+/* ============ DATOS: 10 ejercicios progresivos ============
+ t: plantilla con huecos [[n]] · s: soluciones por hueco · d: distractores
+ h: pista · b: insignia */
+const EX=[
+{n:"Tu primer programa",l:"Nivel 1 · Salida",b:["🚀","Piloto"],
+ e:"System.out.println(\"texto\") imprime un mensaje en la consola y salta de línea. System es una clase de Java, out es la salida y println el método que escribe.",
+ r:"Completa el programa para que muestre ¡Hola Java! en pantalla.",
+ t:'public class Hola {\n    public static void main(String[] args) {\n        [[0]].out.[[1]]("¡Hola Java!");\n    }\n}',
+ s:["System","println"],d:["system","printn","echo"],h:"La clase empieza con mayúscula y el método imprime una línea (print + line)."},
+{n:"Variables",l:"Nivel 2 · Declaración",b:["📦","Guardián"],
+ e:"Una variable guarda un dato. Se declara con: tipo nombre = valor; Usamos int para números enteros y String para texto entre comillas dobles.",
+ r:"Declara la edad (entera) y el nombre (texto) del estudiante.",
+ t:'[[0]] edad = [[1]];\n[[2]] nombre = [[3]];\nSystem.out.println(nombre + " tiene " + edad);',
+ s:["int","18","String",'"Ana"'],d:["double","'Ana'","string"],h:"int guarda enteros sin comillas; String guarda texto con comillas dobles."},
+{n:"Tipos de datos",l:"Nivel 3 · Tipos primitivos",b:["🧬","Biólogo"],
+ e:"double guarda decimales, boolean guarda true o false y char guarda un solo carácter entre comillas simples.",
+ r:"Elige el tipo correcto para cada valor.",
+ t:'[[0]] precio = 9.99;\n[[1]] activo = true;\n[[2]] letra = \'A\';',
+ s:["double","boolean","char"],d:["int","String","float"],h:"9.99 tiene decimales; true/false es lógico; 'A' es un único carácter."},
+{n:"Operadores",l:"Nivel 4 · Aritmética y comparación",b:["➕","Calculista"],
+ e:"+ suma, % da el residuo de una división y > compara si el valor de la izquierda es mayor. Las comparaciones devuelven boolean.",
+ r:"Con a = 7 y b = 2, calcula la suma (9), el residuo (1) y si a es mayor que b.",
+ t:'int a = 7, b = 2;\nint suma = a [[0]] b;\nint resto = a [[1]] b;\nboolean mayor = a [[2]] b;',
+ s:["+","%",">"],d:["-","==","&&","/"],h:"7 % 2 = 1 porque 7 = 3·2 + 1."},
+{n:"Captura de datos",l:"Nivel 5 · Scanner",b:["⌨️","Escriba"],
+ e:"La clase Scanner lee lo que el usuario escribe. Se importa de java.util, se crea con new Scanner(System.in) y nextLine() lee una línea de texto.",
+ r:"Completa el código para leer el nombre del usuario.",
+ t:'import java.util.[[0]];\n\nScanner sc = new [[1]](System.in);\nString nombre = sc.[[2]]();',
+ s:["Scanner","Scanner","nextLine"],d:["Input","readLine","next2"],h:"La clase se escribe igual en el import y en new. Para leer una línea: next + Line."},
+{n:"Condicional if / else",l:"Nivel 6 · Decisiones",b:["🔀","Estratega"],
+ e:"if ejecuta un bloque si la condición es verdadera; else se ejecuta en caso contrario. >= significa mayor o igual.",
+ r:"Muestra Aprobado si la nota es 6 o más; si no, Reprobado.",
+ t:'if (nota [[0]] 6) {\n    System.out.println("Aprobado");\n} [[1]] {\n    System.out.println("Reprobado");\n}',
+ s:[">=","else"],d:["=","elseif","=>"],h:"= asigna, no compara. Para comparar usa >=."},
+{n:"Ciclo for",l:"Nivel 7 · Repetición con contador",b:["🔁","Repetidor"],
+ e:"for tiene tres partes: inicio; condición; cambio. Repite mientras la condición sea verdadera. i++ suma 1 a i.",
+ r:"Imprime los números del 1 al 5.",
+ t:'for (int i = [[0]]; i [[1]] 5; i[[2]]) {\n    System.out.println(i);\n}',
+ s:["1","<=","++"],d:["0",">=","--","5"],h:"Empieza en 1, continúa mientras i sea menor o igual a 5 y sube de uno en uno."},
+{n:"Ciclo while",l:"Nivel 8 · Repetición con condición",b:["⏳","Cronómetro"],
+ e:"while repite un bloque mientras su condición sea verdadera. Dentro debes modificar la variable o el ciclo será infinito.",
+ r:"Haz una cuenta regresiva: 3, 2, 1.",
+ t:'int n = 3;\n[[0]] (n [[1]] 0) {\n    System.out.println(n);\n    n[[2]];\n}',
+ s:["while",">","--"],d:["for","<","++","if"],h:"Mientras n sea mayor que 0, y en cada vuelta n baja en 1."},
+{n:"Lógica: suma de pares",l:"Nivel 9 · Algoritmo",b:["🧠","Lógico"],
+ e:"Un % 2 == 0 identifica números pares. Combinando for e if puedes filtrar y acumular. += suma al acumulador.",
+ r:"Suma solo los números pares del 1 al 10 (el resultado es 30).",
+ t:'int suma = 0;\nfor (int i = 1; i <= 10; i++) {\n    [[0]]\n        [[1]]\n    }\n}\nSystem.out.println(suma);',
+ s:["if (i % 2 == 0) {","suma += i;"],d:["if (i / 2 == 0) {","suma = i;","suma++;"],h:"Primero pregunta si i es par y, dentro, acumula i en suma."},
+{n:"Ventana con Swing",l:"Nivel 10 · Interfaz gráfica",b:["🪟","Diseñador"],
+ e:"Java Swing crea interfaces gráficas. JFrame es la ventana, JButton un botón, add() lo agrega y setVisible(true) la muestra.",
+ r:"Construye una ventana con un botón y hazla visible.",
+ t:'import javax.swing.*;\n\nJFrame f = new [[0]]("Mi ventana");\nf.setSize(300, 200);\nJButton b = new [[1]]("Clic");\nf.[[2]](b);\nf.setVisible([[3]]);',
+ s:["JFrame","JButton","add","true"],d:["Frame","JLabel","push","false"],h:"Los componentes Swing empiezan con J. Para mostrar la ventana: true."}
+];
+
+/* ============ ESTADO (persistente con localStorage si está disponible) ============ */
+const KEY="java-recurso-v1";
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const fresh=x=>({p:x.s.map(()=>null),ord:shuffle([...x.s,...x.d].map((_,i)=>i)),att:0,hints:0,done:false,pts:0,res:[]});
+let S={view:"home",cur:0,ex:EX.map(fresh)};
+try{const g=JSON.parse(localStorage.getItem(KEY));if(g&&g.ex&&g.ex.length===EX.length)S=g}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const $=s=>document.querySelector(s);
+const blocksOf=x=>[...x.s,...x.d];
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+/* ============ CABECERA: progreso y puntaje ============ */
+function updateHead(){
+  const n=S.ex.filter(e=>e.done).length,pts=S.ex.reduce((a,e)=>a+e.pts,0);
+  $("#pb").style.width=n*10+"%";$("#pg").textContent=n+"/10";$("#sc").textContent=pts+" pts";
+}
+$("#btnRes").onclick=()=>{S.view="end";render()};
+
+/* ============ RENDER principal (SPA) ============ */
+function render(){save();updateHead();
+  const a=$("#app");
+  if(S.view==="home")a.innerHTML=`<div class="card hero"><div class="big">&lt;/&gt;</div><h2>Aprende Java armando código</h2>
+  <p>Completa 10 programas arrastrando los bloques a los huecos. Cada reto ganado suma hasta 100 puntos y una insignia. Los intentos fallidos y las pistas restan puntos.</p>
+  <p style="color:var(--mute)">En pantallas táctiles toca un bloque para colocarlo y toca un hueco lleno para devolverlo.</p>
+  <button class="btn go" id="start">${S.ex.some(e=>e.att)?"Continuar":"Comenzar"}</button></div>`,
+  $("#start").onclick=()=>{S.view="ex";render()};
+  else if(S.view==="end")renderEnd(a);
+  else renderEx(a);
+}
+
+/* ============ VISTA DE EJERCICIO ============ */
+function renderEx(a){
+  const i=S.cur,x=EX[i],st=S.ex[i];
+  // código con huecos
+  let code=esc(x.t).replace(/\[\[(\d)\]\]/g,(m,k)=>{
+    const b=st.p[k];
+    return `<span class="slot ${b!==null?"full":""} ${st.res[k]||""}" data-s="${k}" title="${b!==null?"Clic para devolver":"Suelta aquí"}">${b!==null?esc(blocksOf(x)[b]):"?"}</span>`});
+  const pool=st.ord.filter(b=>!st.p.includes(b)).map(b=>`<span class="blk" draggable="true" data-b="${b}">${esc(blocksOf(x)[b])}</span>`).join("");
+  a.innerHTML=`<div class="nav">${EX.map((_,k)=>`<button data-go="${k}" class="${k===i?"cur":""} ${S.ex[k].done?"done":""}" aria-label="Ejercicio ${k+1}">${k+1}</button>`).join("")}</div>
+  <div class="card ${st.done?"locked":""}">
+    <div class="lvl">${x.l}</div><h2>${i+1}. ${x.n}</h2>
+    <p>${x.e}</p><p class="goal"><b>Reto:</b> ${x.r}</p>
+    <pre class="code" id="code">${code}</pre>
+    <div class="pool" id="pool">${pool||'<span style="color:var(--mute)">Todos los bloques están colocados</span>'}</div>
+    <div class="tools">
+      <button class="btn main" id="chk" ${st.done?"disabled":""}>Comprobar</button>
+      <button class="btn" id="hint" ${st.done?"disabled":""}>Pista</button>
+      <button class="btn" id="rst">Reiniciar</button>
+      <span class="pill">Intentos: ${st.att}</span><span class="pill">Pistas: ${st.hints}</span>
+      ${st.done?`<span class="pill" style="color:var(--ok)">+${st.pts} pts</span>`:""}
+    </div>
+    <div class="msg" id="msg"></div>
+    ${st.done?`<div class="badge">${x.b[0]} Insignia: ${x.b[1]}</div>`:""}
+    ${st.done?`<div class="tools"><button class="btn go" id="next">${i<9?"Siguiente ejercicio":"Ver resultados"}</button></div>`:""}
+  </div>
+  <div class="tools" style="margin-top:0"><button class="btn" id="prev" ${i===0?"disabled":""}>Anterior</button><button class="btn" id="nxt" ${i===9?"disabled":""}>Siguiente</button></div>`;
+  bind();
+  if(st.hintShown)say("hint","💡 "+x.h);
+}
+
+function say(type,html){const m=$("#msg");if(!m)return;m.className="msg show "+type;m.innerHTML=html}
+
+/* ============ INTERACCIÓN: arrastrar, soltar y clic ============ */
+function place(slot,b){ // coloca el bloque b en el hueco slot (el anterior vuelve al banco)
+  const st=S.ex[S.cur];if(st.done)return;
+  const old=st.p.indexOf(b);if(old>-1)st.p[old]=null; // si ya estaba en otro hueco, lo mueve
+  st.p[slot]=b;st.res=[];st.hintShown=false;render();
+}
+function bind(){
+  const st=S.ex[S.cur];
+  document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{S.cur=+b.dataset.go;render()});
+  document.querySelectorAll(".blk").forEach(el=>{
+    el.ondragstart=e=>{e.dataTransfer.setData("text/plain",el.dataset.b);e.dataTransfer.effectAllowed="move";el.classList.add("drag")};
+    el.ondragend=()=>el.classList.remove("drag");
+    el.onclick=()=>{const k=st.p.indexOf(null);if(k>-1)place(k,+el.dataset.b)}; // clic: primer hueco libre
+  });
+  document.querySelectorAll(".slot").forEach(el=>{
+    el.ondragover=e=>{e.preventDefault();el.classList.add("over")};
+    el.ondragleave=()=>el.classList.remove("over");
+    el.ondrop=e=>{e.preventDefault();place(+el.dataset.s,+e.dataTransfer.getData("text/plain"))};
+    el.onclick=()=>{if(st.p[el.dataset.s]!==null&&!st.done){st.p[el.dataset.s]=null;st.res=[];render()}};
+  });
+  const pool=$("#pool"); // soltar en el banco devuelve el bloque
+  pool.ondragover=e=>{e.preventDefault();pool.classList.add("over")};
+  pool.ondragleave=()=>pool.classList.remove("over");
+  pool.ondrop=e=>{e.preventDefault();const b=+e.dataTransfer.getData("text/plain"),k=st.p.indexOf(b);if(k>-1){st.p[k]=null;st.res=[];render()}};
+  $("#chk").onclick=check;
+  $("#hint").onclick=()=>{if(!st.hintShown){st.hints++;st.hintShown=true}render()};
+  $("#rst").onclick=()=>{S.ex[S.cur]=fresh(EX[S.cur]);render()}; // solo reinicia este ejercicio
+  $("#prev").onclick=()=>{S.cur--;render()};
+  $("#nxt").onclick=()=>{S.cur++;render()};
+  const n=$("#next");if(n)n.onclick=()=>{if(S.cur<9)S.cur++;else S.view="end";render()};
+}
+
+/* ============ VALIDACIÓN ============ */
+function check(){
+  const x=EX[S.cur],st=S.ex[S.cur];
+  if(st.p.includes(null)){say("hint","Aún hay huecos vacíos. Arrastra un bloque a cada <b>?</b> antes de comprobar.");return}
+  const all=blocksOf(x);
+  st.res=st.p.map((b,k)=>all[b]===x.s[k]?"ok":"bad"); // compara contenido y posición
+  st.att++;
+  const good=st.res.filter(r=>r==="ok").length;
+  if(good===x.s.length){
+    st.done=true;st.pts=Math.max(20,100-15*(st.att-1)-10*st.hints);
+    render();say("ok",`✅ ¡Correcto! Tu programa está completo. Ganaste <b>${st.pts} puntos</b>.`);confetti();
+  }else{
+    render();say("bad",`❌ ${good} de ${x.s.length} huecos correctos. Los huecos en rojo no son correctos: toca uno para devolverlo y prueba otro bloque. Cada intento fallido resta 15 puntos.`);
+  }
+}
+function confetti(){ // efecto visual de celebración
+  const e=["⭐","✨","🎉","💻","☕"];
+  for(let i=0;i<14;i++){const s=document.createElement("span");s.className="fx";s.textContent=e[i%5];
+    s.style.left=30+Math.random()*40+"vw";s.style.top="60vh";s.style.setProperty("--x",(Math.random()*200-100)+"px");
+    document.body.appendChild(s);setTimeout(()=>s.remove(),1300)}
+}
+
+/* ============ PANTALLA FINAL ============ */
+function renderEnd(a){
+  const tot=S.ex.reduce((s,e)=>s+e.pts,0),n=S.ex.filter(e=>e.done).length;
+  const rank=n<10?"Aprendiz en progreso":tot>=900?"Maestro de Java":tot>=700?"Programador/a avanzado/a":tot>=500?"Programador/a competente":"Explorador/a de código";
+  a.innerHTML=`<div class="card hero"><h2>Resultados</h2><div class="big">${tot}<small style="font-size:1rem;color:var(--mute)"> / 1000</small></div>
+  <p><b>${rank}</b> · ${n} de 10 ejercicios completados · ${S.ex.reduce((s,e)=>s+e.att,0)} intentos en total</p>
+  ${n<10?'<p style="color:var(--mute)">Completa los ejercicios pendientes para desbloquear todas las insignias y el rango máximo.</p>':""}</div>
+  <div class="card"><h2>Insignias</h2><div class="grid">${EX.map((x,k)=>`<div class="bd ${S.ex[k].done?"":"off"}"><b>${x.b[0]}</b>${x.b[1]}</div>`).join("")}</div></div>
+  <div class="card"><h2>Detalle</h2><div style="overflow-x:auto"><table><tr><th>Ejercicio</th><th>Estado</th><th>Intentos</th><th>Pistas</th><th>Puntos</th></tr>
+  ${EX.map((x,k)=>{const e=S.ex[k];return `<tr><td><a href="#" data-go="${k}" style="color:var(--cyan)">${k+1}. ${x.n}</a></td><td>${e.done?"✅ Completado":"Pendiente"}</td><td>${e.att}</td><td>${e.hints}</td><td>${e.pts}</td></tr>`}).join("")}</table></div>
+  <div class="tools"><button class="btn go" id="back">Volver a los ejercicios</button><button class="btn" id="all">Reiniciar todo</button></div></div>`;
+  a.querySelectorAll("[data-go]").forEach(l=>l.onclick=e=>{e.preventDefault();S.cur=+l.dataset.go;S.view="ex";render()});
+  $("#back").onclick=()=>{S.view="ex";render()};
+  $("#all").onclick=()=>{if(confirm("¿Borrar todo el progreso?")){S.ex=EX.map(fresh);S.cur=0;S.view="home";render()}};
+}
+render();
+</script>
+</body>
+</html>
